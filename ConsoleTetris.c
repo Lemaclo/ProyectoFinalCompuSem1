@@ -9,6 +9,7 @@ Proyecto Final
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 //En esta versión, quiero implementar TETRIS con gráficos en consola.
 #include "screen.h"
@@ -16,16 +17,6 @@ Proyecto Final
 //Esta librería tiene funciones para las piezas:
 #include "tetris_helper.h"
 
-//Dimensinoes de la matriz. (10, 20) son las default.
-#define MATRIX_X 10
-#define MATRIX_Y 20
-
-//Tamaño de los bloques de chars
-#define BLOCK_X 2
-#define BLOCK_Y 1
-
-//Bloque imprimible
-#define BLOCK "█"
 
 //Piezas por default
 tetromino defaultPositions[7];
@@ -35,12 +26,36 @@ pixel matrix[MATRIX_Y+2][MATRIX_X];
 
 void initMatrix(void);
 void printMatrix(void);
-void drawPiece(tetromino piece);
+void drawPiece(tetromino *piece);
+tetromino getPiece(int id);
 
 int main(int nargs, char **argsv){
+	//Initialize
 	initMatrix();
+	defaultVariables();
+
+	//Prueba de dibujo:
+	tetromino piece = getPiece(T_PIECE);
+	drawPiece(&piece);
 	printMatrix();
 	getchar();
+
+	fall(&piece);
+	drawPiece(&piece);
+	printMatrix();
+	getchar();
+
+	fall(&piece);
+	drawPiece(&piece);
+	printMatrix();
+	getchar();
+
+	fall(&piece);
+	drawPiece(&piece);
+	printMatrix();
+	getchar();
+
+	//Clean up
 	clearScreen();
 	gotoxy(0,0);
 	resetColor();
@@ -87,4 +102,9 @@ void drawPiece(tetromino *piece){
 	for(int i=0;i<4;i++){
 		matrix[piece->body[i].y][piece->body[i].x] = piece->color;
 	}
+}
+
+//Esto únicamente es una función para que haga una copia y no toque el original.
+tetromino getPiece(int id){
+	return defaultPositions[id];
 }

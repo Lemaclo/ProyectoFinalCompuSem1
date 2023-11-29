@@ -129,11 +129,12 @@ void defaultVariables(void){
 void generatePiece(tetromino *piece){
 	for(int i=1;i<4;i++){
 		piece->body[i].x = piece->body[0].x + piece->generation_offset[i-1].x;
-		piece->body[i].y = piece->body[0].y + piece->generation_offset[i-1].y;
+		piece->body[i].y = piece->body[0].y - piece->generation_offset[i-1].y;
 	}
 }
 
 void rotateR(tetromino *piece){
+	erasePiece(piece);
 	for(int i=0;i<3;i++){
 		char temp = piece->generation_offset[i].x; 
 		piece->generation_offset[i].x = piece->generation_offset[i].y;
@@ -143,6 +144,7 @@ void rotateR(tetromino *piece){
 }
 
 void rotateL(tetromino *piece){
+	erasePiece(piece);
 	for(int i=0;i<3;i++){
 		char temp = piece->generation_offset[i].x; 
 		piece->generation_offset[i].x = -1 * piece->generation_offset[i].y;
@@ -152,6 +154,7 @@ void rotateL(tetromino *piece){
 }
 
 void rotate2(tetromino *piece){
+	erasePiece(piece);
 	for(int i=0;i<3;i++){
 		piece->generation_offset[i].x *= -1;
 		piece->generation_offset[i].y *= -1;
@@ -160,16 +163,42 @@ void rotate2(tetromino *piece){
 }
 
 void fall(tetromino *piece){
+	erasePiece(piece);
 	piece->body[0].y++;
 	generatePiece(piece);
 }
 
 void moveR(tetromino *piece){
+	erasePiece(piece);
 	piece->body[0].x++;
 	generatePiece(piece);
 }
 
 void moveL(tetromino *piece){
+	erasePiece(piece);
 	piece->body[0].x--;
 	generatePiece(piece);
+}
+
+void erasePiece(tetromino *piece){
+	for(int i=0;i<4;i++){
+		matrix[piece->body[i].y][piece->body[i].x].r = 0;
+		matrix[piece->body[i].y][piece->body[i].x].g = 0;
+		matrix[piece->body[i].y][piece->body[i].x].b = 0;
+	}
+}
+
+unsigned char isEmpty(unsigned char x, unsigned char y){
+	return matrix[y][x].r | matrix[y][x].g | matrix[y][x].b;
+}
+
+char validatePiecePosition(tetromino *piece){
+	for(int i=0;i<4;i++){
+		short x = piece->body[i].x;
+		short y = piece->body[i].y;
+		if(x < 0 || x >= MATRIX_X) return 0;
+		if(y < 0 || y >= MATRIX_Y) return 0;
+		if(!isEmpty(x,y)) return 0;
+	}
+	return 1;
 }
