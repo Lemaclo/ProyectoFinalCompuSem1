@@ -11,7 +11,7 @@ Proyecto Final
 
 void defaultVariables(void){
 	//Pieza O
-
+	
 	defaultPositions[0].generation_offset[0].x = 0;
 	defaultPositions[0].generation_offset[0].y = 1;
 
@@ -20,6 +20,10 @@ void defaultVariables(void){
 
 	defaultPositions[0].generation_offset[2].x = 1;
 	defaultPositions[0].generation_offset[2].y = 0;
+
+	defaultPositions[0].color.r = 0xff;
+	defaultPositions[0].color.g = 0xff;
+	defaultPositions[0].color.b = 0x0;
 
 	//Pieza I
 
@@ -32,6 +36,10 @@ void defaultVariables(void){
 	defaultPositions[1].generation_offset[2].x = 1;
 	defaultPositions[1].generation_offset[2].y = 0;
 
+	defaultPositions[1].color.r = 0x0;
+	defaultPositions[1].color.g = 0xff;
+	defaultPositions[1].color.b = 0xff;
+
 	//Pieza T
 
 	defaultPositions[2].generation_offset[0].x = -1;
@@ -43,6 +51,10 @@ void defaultVariables(void){
 	defaultPositions[2].generation_offset[2].x = 1;
 	defaultPositions[2].generation_offset[2].y = 0;
 
+	defaultPositions[2].color.r = 0x80;
+	defaultPositions[2].color.g = 0x0;
+	defaultPositions[2].color.b = 0x80;
+	
 	//Pieza L
 
 	defaultPositions[3].generation_offset[0].x = -1;
@@ -53,6 +65,10 @@ void defaultVariables(void){
 
 	defaultPositions[3].generation_offset[2].x = 1;
 	defaultPositions[3].generation_offset[2].y = 0;
+
+	defaultPositions[3].color.r = 0xff;
+	defaultPositions[3].color.g = 0x7f;
+	defaultPositions[3].color.b = 0x00;
 
 	//Pieza J
 
@@ -65,6 +81,10 @@ void defaultVariables(void){
 	defaultPositions[4].generation_offset[2].x = 1;
 	defaultPositions[4].generation_offset[2].y = 0;
 
+	defaultPositions[4].color.r = 0x00;
+	defaultPositions[4].color.g = 0x00;
+	defaultPositions[4].color.b = 0xff;
+
 	//Pieza S
 
 	defaultPositions[5].generation_offset[0].x = -1;
@@ -76,6 +96,10 @@ void defaultVariables(void){
 	defaultPositions[5].generation_offset[2].x = 1;
 	defaultPositions[5].generation_offset[2].y = 1;
 
+	defaultPositions[5].color.r = 0x00;
+	defaultPositions[5].color.g = 0xff;
+	defaultPositions[5].color.b = 0x00;
+
 	//Pieza Z
 
 	defaultPositions[6].generation_offset[0].x = -1;
@@ -86,6 +110,10 @@ void defaultVariables(void){
 
 	defaultPositions[6].generation_offset[2].x = 1;
 	defaultPositions[6].generation_offset[2].y = 0;
+
+	defaultPositions[6].color.r = 0xff;
+	defaultPositions[6].color.g = 0x00;
+	defaultPositions[6].color.b = 0x00;
 
 	//Cada pieza empieza con estado 0 (sin rotar):
 
