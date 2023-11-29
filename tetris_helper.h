@@ -54,12 +54,12 @@ typedef struct{
 
 void defaultVariables(void);
 void generatePiece(tetromino *piece);
-void rotateR(tetromino *piece);
-void rotateL(tetromino *piece);
-void rotate2(tetromino *piece);
-void fall(tetromino *piece);
-void moveR(tetromino *piece);
-void moveL(tetromino *piece);
+tetromino rotateR(tetromino *piece);
+tetromino rotateL(tetromino *piece);
+tetromino rotate2(tetromino *piece);
+tetromino fall(tetromino *piece);
+tetromino moveR(tetromino *piece);
+tetromino moveL(tetromino *piece);
 void erasePiece(tetromino *piece);
 unsigned char isEmpty(unsigned char x, unsigned char y);
 char validatePiecePosition(tetromino *piece);

@@ -133,51 +133,57 @@ void generatePiece(tetromino *piece){
 	}
 }
 
-void rotateR(tetromino *piece){
-	erasePiece(piece);
+tetromino rotateR(tetromino *piece){
+	tetromino babyPiece = *piece;
 	for(int i=0;i<3;i++){
 		char temp = piece->generation_offset[i].x; 
-		piece->generation_offset[i].x = piece->generation_offset[i].y;
-		piece->generation_offset[i].y = -1*temp;
+		babyPiece.generation_offset[i].x = piece->generation_offset[i].y;
+		babyPiece.generation_offset[i].y = -1*temp;
 	}
-	generatePiece(piece);
+	generatePiece(&babyPiece);
+	return babyPiece;
 }
 
-void rotateL(tetromino *piece){
-	erasePiece(piece);
+tetromino rotateL(tetromino *piece){
+	tetromino babyPiece = *piece;
 	for(int i=0;i<3;i++){
 		char temp = piece->generation_offset[i].x; 
-		piece->generation_offset[i].x = -1 * piece->generation_offset[i].y;
-		piece->generation_offset[i].y = temp;
+		babyPiece.generation_offset[i].x = -1 * piece->generation_offset[i].y;
+		babyPiece.generation_offset[i].y = temp;
 	}
-	generatePiece(piece);
+	generatePiece(&babyPiece);
+	return babyPiece;
 }
 
-void rotate2(tetromino *piece){
-	erasePiece(piece);
+tetromino rotate2(tetromino *piece){
+	tetromino babyPiece = *piece;
 	for(int i=0;i<3;i++){
-		piece->generation_offset[i].x *= -1;
-		piece->generation_offset[i].y *= -1;
+		babyPiece.generation_offset[i].x *= -1;
+		babyPiece.generation_offset[i].y *= -1;
 	}
-	generatePiece(piece);
+	generatePiece(&babyPiece);
+	return babyPiece;
 }
 
-void fall(tetromino *piece){
-	erasePiece(piece);
-	piece->body[0].y++;
-	generatePiece(piece);
+tetromino fall(tetromino *piece){
+	tetromino babyPiece = *piece;
+	babyPiece.body[0].y++;
+	generatePiece(&babyPiece);
+	return babyPiece;
 }
 
-void moveR(tetromino *piece){
-	erasePiece(piece);
-	piece->body[0].x++;
-	generatePiece(piece);
+tetromino moveR(tetromino *piece){
+	tetromino babyPiece = *piece;
+	babyPiece.body[0].x++;
+	generatePiece(&babyPiece);
+	return babyPiece;
 }
 
-void moveL(tetromino *piece){
-	erasePiece(piece);
-	piece->body[0].x--;
-	generatePiece(piece);
+tetromino moveL(tetromino *piece){
+	tetromino babyPiece = *piece;
+	babyPiece.body[0].x--;
+	generatePiece(&babyPiece);
+	return babyPiece;
 }
 
 void erasePiece(tetromino *piece){
@@ -197,8 +203,8 @@ char validatePiecePosition(tetromino *piece){
 		short x = piece->body[i].x;
 		short y = piece->body[i].y;
 		if(x < 0 || x >= MATRIX_X) return 0;
-		if(y < 0 || y >= MATRIX_Y) return 0;
-		if(!isEmpty(x,y)) return 0;
+		if(y < 0 || y >= MATRIX_Y + 2) return 0;
+		//if(!isEmpty(x,y)) return 0;
 	}
 	return 1;
 }

@@ -30,9 +30,9 @@ void resetStyle(void){
 }
 
 void setRaw(void){
-	system("ssty raw -echo");
+	system("stty raw -echo");
 }
 
 void setCooked(void){
-	system("ssty cooked echo");
+	system("stty cooked echo");
 }

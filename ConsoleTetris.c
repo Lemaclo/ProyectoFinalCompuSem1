@@ -30,32 +30,59 @@ void drawPiece(tetromino *piece);
 tetromino getPiece(int id);
 
 int main(int nargs, char **argsv){
+	setRaw();
 	//Initialize
 	initMatrix();
 	defaultVariables();
 
 	//Prueba de dibujo:
-	tetromino piece = getPiece(T_PIECE);
+	tetromino piece = getPiece(Z_PIECE);
+	piece = fall(&piece);
 	drawPiece(&piece);
 	printMatrix();
-	getchar();
-
-	fall(&piece);
-	drawPiece(&piece);
-	printMatrix();
-	getchar();
-
-	fall(&piece);
-	drawPiece(&piece);
-	printMatrix();
-	getchar();
-
-	fall(&piece);
-	drawPiece(&piece);
-	printMatrix();
-	getchar();
+	int input;
+	while((input = getchar()) != 3){
+		tetromino possible;
+		switch(input){
+			case 'a':
+				possible = moveL(&piece);
+				break;
+			case 'd':
+				possible = moveR(&piece);
+				break;
+			case '\033':
+				if(getchar() == '['){
+					switch(getchar()){
+						case 'D':
+							possible = rotateL(&piece);
+							break;
+						case 'C':
+							possible = rotateR(&piece);
+							break;
+						default:
+							break;
+					}
+				}
+			default:
+				break;
+		}
+		//Verifica si es valido el movimiento actual
+		if(validatePiecePosition(&possible)){
+			erasePiece(&piece);
+			piece = possible;
+		}
+		possible = fall(&piece);
+		//Intenta caer
+		if(validatePiecePosition(&possible)){
+			erasePiece(&piece);
+			piece = possible;
+		}
+		drawPiece(&piece);
+		printMatrix();
+	}
 
 	//Clean up
+	setCooked();
 	clearScreen();
 	gotoxy(0,0);
 	resetColor();
