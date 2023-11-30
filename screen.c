@@ -6,7 +6,8 @@ void gotoxy(int x,int y){
 }
 
 void clearScreen(void){
-	printf("\033[2J");
+	system("clear");
+	//printf("\033[2J");
 }
 
 void setColor(unsigned char r, unsigned char g, unsigned char b){
@@ -35,4 +36,14 @@ void setRaw(void){
 
 void setCooked(void){
 	system("stty cooked echo");
+}
+
+void setSpecialInput(void){
+	system("stty min 0 time 1");
+	system("tput civis");
+}
+
+void setNormalInput(void){
+	system("stty min 1 time 0");
+	system("tput cnorm");
 }

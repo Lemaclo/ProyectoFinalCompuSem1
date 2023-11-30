@@ -10,6 +10,8 @@ Proyecto Final
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
+
 
 //En esta versión, quiero implementar TETRIS con gráficos en consola.
 #include "screen.h"
@@ -28,64 +30,127 @@ void initMatrix(void);
 void printMatrix(void);
 void drawPiece(tetromino *piece);
 tetromino getPiece(int id);
+void delay(unsigned int milis);
+int getInput(void);
 
 int main(int nargs, char **argsv){
 	setRaw();
+	setSpecialInput();
 	//Initialize
 	initMatrix();
 	defaultVariables();
 
 	//Prueba de dibujo:
-	tetromino piece = getPiece(Z_PIECE);
+	tetromino piece = getPiece(rand() % 7);
 	piece = fall(&piece);
 	drawPiece(&piece);
 	printMatrix();
 	int input;
+	int count = 0;
+	int set = 0;
 	while((input = getchar()) != 3){
+		if (set){	
+			printf("\a");
+			piece = getPiece(rand() % 7);
+			drawPiece(&piece);
+			printMatrix();
+			set = 0;
+		}
+		count++;
 		tetromino possible;
 		switch(input){
+			case -1:
+				possible = piece;
+				rewind(stdin);
+				break;
 			case 'a':
 				possible = moveL(&piece);
 				break;
 			case 'd':
 				possible = moveR(&piece);
 				break;
-			case '\033':
-				if(getchar() == '['){
+			case 's':
+				count = 10;
+				break;
+			case 'w':
+				int final = 1;
+				possible = piece;
+				count = 10;
+				do{
+					possible = fall(&piece);
+					if(firstCheck(&possible)){
+						erasePiece(&piece);
+						if (secondCheck(&possible)){
+							piece = possible;
+						} else {
+							final = 0;
+						}
+					} else {
+						final = 0;
+					}
+				} while(final);
+				break;
+			case 27://Esto es para las flechas.
+				if(getchar() == 91){
 					switch(getchar()){
-						case 'D':
+						case 68:
+							//printf("\a");
 							possible = rotateL(&piece);
 							break;
-						case 'C':
+						case 67:
+							//printf("\a");
 							possible = rotateR(&piece);
 							break;
+						case 66:
+							//printf("\a");
+							possible = rotate2(&piece);
+							break;
 						default:
+							possible = piece;
 							break;
 					}
 				}
+				break;
 			default:
+				possible = piece;
+				rewind(stdin);
 				break;
 		}
+
 		//Verifica si es valido el movimiento actual
-		if(validatePiecePosition(&possible)){
+		if(firstCheck(&possible)){
 			erasePiece(&piece);
-			piece = possible;
+			if (secondCheck(&possible)){
+				piece = possible;
+			}
 		}
-		possible = fall(&piece);
+
 		//Intenta caer
-		if(validatePiecePosition(&possible)){
-			erasePiece(&piece);
-			piece = possible;
+		if(count % 10 == 0){
+			possible = fall(&piece);
+			if(firstCheck(&possible)){
+				erasePiece(&piece);
+				if (secondCheck(&possible)){
+					piece = possible;
+				} else {
+					set = 1;
+				}
+			} else {
+				set = 1;
+			}
 		}
 		drawPiece(&piece);
 		printMatrix();
+		fflush(stdout);
+		//delay(200);
 	}
 
 	//Clean up
-	setCooked();
 	clearScreen();
+	setCooked();
 	gotoxy(0,0);
 	resetColor();
+	setNormalInput();
 	return 0;
 }
 
@@ -134,4 +199,17 @@ void drawPiece(tetromino *piece){
 //Esto únicamente es una función para que haga una copia y no toque el original.
 tetromino getPiece(int id){
 	return defaultPositions[id];
+}
+
+//Esta función pausa el programa durante milis milisegundos.
+void delay(unsigned int milis){
+	clock_t finish = clock() + (milis * CLOCKS_PER_SEC) / 1000;
+	while (finish - clock() > 0){
+		;
+	}
+}
+
+int getInput(void){
+	int c = getchar();
+	return c;
 }

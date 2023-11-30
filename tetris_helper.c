@@ -198,13 +198,22 @@ unsigned char isEmpty(unsigned char x, unsigned char y){
 	return matrix[y][x].r | matrix[y][x].g | matrix[y][x].b;
 }
 
-char validatePiecePosition(tetromino *piece){
+char firstCheck(tetromino *piece){
 	for(int i=0;i<4;i++){
 		short x = piece->body[i].x;
 		short y = piece->body[i].y;
 		if(x < 0 || x >= MATRIX_X) return 0;
 		if(y < 0 || y >= MATRIX_Y + 2) return 0;
 		//if(!isEmpty(x,y)) return 0;
+	}
+	return 1;
+}
+
+char secondCheck(tetromino *piece){
+	for(int i=0;i<4;i++){
+		short x = piece->body[i].x;
+		short y = piece->body[i].y;
+		if(isEmpty(x,y) != 0) return 0;
 	}
 	return 1;
 }

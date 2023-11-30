@@ -15,5 +15,7 @@ void setBold(void);
 void resetStyle(void);
 void setRaw(void);
 void setCooked(void);
+void setSpecialInput(void);
+void setNormalInput(void);
 
 #endif /* SCREEN_H */
