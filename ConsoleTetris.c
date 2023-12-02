@@ -32,26 +32,36 @@ void drawPiece(tetromino *piece);
 tetromino getPiece(int id);
 void delay(unsigned int milis);
 int getInput(void);
+void clearLines(void);
+void get7Bag(unsigned int pos);
+tetromino pop(void);
+
+tetromino cola[14];
 
 int main(int nargs, char **argsv){
+	srand(time(0));
 	setRaw();
 	setSpecialInput();
 	//Initialize
 	initMatrix();
 	defaultVariables();
+	get7Bag(0);
+	get7Bag(7);
 
 	//Prueba de dibujo:
-	tetromino piece = getPiece(rand() % 7);
+	tetromino piece = pop();
 	piece = fall(&piece);
 	drawPiece(&piece);
 	printMatrix();
 	int input;
 	int count = 0;
+	int timer = nargs == 2 ? atoi(argsv[1]) : 10;
 	int set = 0;
 	while((input = getchar()) != 3){
 		if (set){	
-			printf("\a");
-			piece = getPiece(rand() % 7);
+			//printf("\a");
+			clearLines();
+			piece = pop();
 			drawPiece(&piece);
 			printMatrix();
 			set = 0;
@@ -70,12 +80,12 @@ int main(int nargs, char **argsv){
 				possible = moveR(&piece);
 				break;
 			case 's':
-				count = 10;
+				count = timer;
 				break;
 			case 'w':
 				int final = 1;
 				possible = piece;
-				count = 10;
+				count = timer;
 				do{
 					possible = fall(&piece);
 					if(firstCheck(&possible)){
@@ -126,7 +136,7 @@ int main(int nargs, char **argsv){
 		}
 
 		//Intenta caer
-		if(count % 10 == 0){
+		if(count % timer == 0){
 			possible = fall(&piece);
 			if(firstCheck(&possible)){
 				erasePiece(&piece);
@@ -141,7 +151,7 @@ int main(int nargs, char **argsv){
 		}
 		drawPiece(&piece);
 		printMatrix();
-		fflush(stdout);
+		//fflush(stdout);
 		//delay(200);
 	}
 
@@ -212,4 +222,55 @@ void delay(unsigned int milis){
 int getInput(void){
 	int c = getchar();
 	return c;
+}
+
+//Esto hace desaparecer las lineas que ya se completaron de la matriz.
+void clearLines(void){
+	for(int i=2;i<MATRIX_Y+2;i++){
+		int flag = 0;
+		for(int j=0;j<MATRIX_X;j++){
+			if(isEmpty(j,i) == 0){
+				flag = 1;
+				break;
+			}
+		}
+		if(flag) continue;
+		printf("\a");
+		for(int k=i;k>2;k--){
+			for(int l=0;l<MATRIX_X;l++){
+				matrix[k][l] = matrix[k-1][l];
+			}
+		}
+		for(int k=2;k<MATRIX_X;k++){
+			matrix[0][k].r = 0;
+			matrix[0][k].g = 0;
+			matrix[0][k].b = 0;
+		}
+	}
+
+}
+
+//Copia 7 tetrominos directamente a la cola. Pos unicamente 
+//puede ser 0 o 7.
+void get7Bag(unsigned int pos){
+	tetromino shuffled[7];
+	memcpy(shuffled, defaultPositions, sizeof(tetromino) * 7);
+	for (int i=0;i<7;i++){
+		int j = rand() % (i+1);
+		if (i != j){
+			tetromino temp = shuffled[i];
+			shuffled[i] = shuffled[j];
+			shuffled[j] = temp;
+		}
+	}
+	memcpy(cola + pos, shuffled, 7 * sizeof(tetromino));
+}
+
+tetromino pop(void){
+	static int count;
+	tetromino ready = cola[0];
+	memcpy(cola, cola + 1, 13 * sizeof(tetromino));
+	count ++;
+	if (count % 7 == 0) get7Bag(7);
+	return ready;
 }
