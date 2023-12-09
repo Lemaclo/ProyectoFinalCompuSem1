@@ -27,29 +27,29 @@ tetromino defaultPositions[7];
 pixel matrix[MATRIX_Y+2][MATRIX_X];
 
 void init(int nargs, char **argsv);
+void cleanUp(void);
 void initMatrix(void);
 void printMatrix(void);
 void drawPiece(tetromino *piece);
+void drawGhostPiece(tetromino *piece);
 tetromino getPiece(int id);
 void delay(unsigned int milis);
 int getInput(void);
 void clearLines(void);
 void get7Bag(unsigned int pos);
 tetromino pop(void);
-tetromino manageInput(int input, tetromino *currentPiece, int *count);
+tetromino manageInput(int input, tetromino *currentPiece, int *count, tetromino *shadow);
+tetromino ghost(tetromino piece);
 
 tetromino cola[14];
-int input, count, timer, set;
 
 int main(int nargs, char **argsv){
 	init(nargs, argsv);
-	tetromino piece = pop();
-	piece = fall(&piece);
-	drawPiece(&piece);
-	printMatrix();
-	tetromino possible;
+	int input, count, timer, set;
+	tetromino piece, possible, shadow;
+	count = set = 1;
+	timer = 10;
 	while((input = getchar()) != 3){
-		count++;
 		if (set){	
 			clearLines();
 			piece = pop();
@@ -57,48 +57,40 @@ int main(int nargs, char **argsv){
 			if(secondCheck(&possible)){
 				piece = possible;
 			} else {
+				//Game over
 				break;
 			}
 			drawPiece(&piece);
+			shadow = ghost(piece);
+			drawGhostPiece(&shadow);
 			printMatrix();
 			set = 0;
+			//delay(200);
 		}
-		possible = manageInput(input, &piece, &count);
+		possible = manageInput(input, &piece, &count, &shadow);
 		//Verifica si es valido el movimiento actual
-		if(firstCheck(&possible)){
-			erasePiece(&piece);
-			if (secondCheck(&possible)){
-				piece = possible;
-			}
+		erasePiece(&piece);
+		if(legalPiece(&possible)){
+			piece = possible;
 		}
-
 		//Intenta caer
 		if(count % timer == 0){
 			possible = fall(&piece);
-			if(firstCheck(&possible)){
-				erasePiece(&piece);
-				if (secondCheck(&possible)){
-					piece = possible;
-				} else {
-					set = 1;
-				}
+			erasePiece(&piece);
+			if(legalPiece(&possible)){
+				piece = possible;
 			} else {
 				set = 1;
 			}
 		}
+		erasePiece(&shadow);
+		shadow = ghost(piece);
+		drawGhostPiece(&shadow);
 		drawPiece(&piece);
 		printMatrix();
-		//fflush(stdout);
-		//delay(200);
+		count++;
 	}
-
-	//Clean up
-	clearScreen();
-	setCooked();
-	gotoxy(0,0);
-	resetColor();
-	setNormalInput();
-	printf("Game over!\n");
+	cleanUp();
 	return 0;
 }
 
@@ -110,10 +102,17 @@ void init(int nargs, char **argsv){
 	defaultVariables();
 	get7Bag(0);
 	get7Bag(7);
-	input = 0;
-	count = 0;
-	timer = nargs == 2 ? atoi(argsv[1]) : 10;
-	set = 0;
+}
+
+void cleanUp(void){
+	//Clean up
+	system("clear");
+	setCooked();
+	gotoxy(0,0);
+	resetColor();
+	setNormalInput();
+	printf("Game over!\n");
+
 }
 
 //Simplemente inicializamos cada pizel de la matriz en negro.
@@ -139,7 +138,7 @@ tetromino ghost(tetromino piece){
 	return possible;
 }
 
-tetromino manageInput(int input, tetromino *piece, int *count){
+tetromino manageInput(int input, tetromino *piece, int *count, tetromino *shadow){
 	switch(input){
 		case 'a':
 			return moveL(piece);
@@ -150,7 +149,7 @@ tetromino manageInput(int input, tetromino *piece, int *count){
 			return *piece;
 		case 'w':
 			*count = 0;
-			return ghost(*piece);
+			return *shadow;
 		//Esto es para las flechas.
 		case 27:
 			if(getchar() == 91){
@@ -204,6 +203,14 @@ void drawPiece(tetromino *piece){
 	}
 }
 
+void drawGhostPiece(tetromino *piece){
+	for(int i=0;i<4;i++){
+		matrix[piece->body[i].y][piece->body[i].x].r = piece->color.r / 3;
+		matrix[piece->body[i].y][piece->body[i].x].g = piece->color.g / 3;
+		matrix[piece->body[i].y][piece->body[i].x].b = piece->color.b / 3;
+	}
+}
+
 //Esto únicamente es una función para que haga una copia y no toque el original.
 tetromino getPiece(int id){
 	return defaultPositions[id];
@@ -215,11 +222,6 @@ void delay(unsigned int milis){
 	while (finish - clock() > 0){
 		;
 	}
-}
-
-int getInput(void){
-	int c = getchar();
-	return c;
 }
 
 //Esto hace desaparecer las lineas que ya se completaron de la matriz.

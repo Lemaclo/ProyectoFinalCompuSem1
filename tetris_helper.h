@@ -64,6 +64,7 @@ void erasePiece(tetromino *piece);
 unsigned char isEmpty(unsigned char x, unsigned char y);
 char firstCheck(tetromino *piece);
 char secondCheck(tetromino *piece);
+char legalPiece(tetromino *piece);
 
 //Este arreglo guarda la información de la posición inicial de cada pieza.
 extern tetromino defaultPositions[7];

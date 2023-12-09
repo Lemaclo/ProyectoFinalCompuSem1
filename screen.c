@@ -6,8 +6,8 @@ void gotoxy(int x,int y){
 }
 
 void clearScreen(void){
-	system("clear");
-	//printf("\033[2J");
+	//system("clear");
+	printf("\033[2J");
 }
 
 void setColor(unsigned char r, unsigned char g, unsigned char b){
