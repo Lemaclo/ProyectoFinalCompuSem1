@@ -26,6 +26,10 @@ Proyecto Final
 #define BLOCK_X 2
 #define BLOCK_Y 1
 
+//Tamaño de la cola
+#define QUEUE_X 4
+#define QUEUE_Y 12
+
 //Bloque imprimible
 #define BLOCK "█"
 

@@ -25,6 +25,8 @@ tetromino defaultPositions[7];
 
 //Matriz principal del juego
 pixel matrix[MATRIX_Y+2][MATRIX_X];
+//Cola
+pixel queue[QUEUE_Y][QUEUE_X];
 
 void init(int nargs, char **argsv);
 void cleanUp(void);
@@ -32,14 +34,19 @@ void initMatrix(void);
 void printMatrix(void);
 void drawPiece(tetromino *piece);
 void drawGhostPiece(tetromino *piece);
+void draw(tetromino *piece, tetromino *shadow);
 tetromino getPiece(int id);
 void delay(unsigned int milis);
-int getInput(void);
 void clearLines(void);
 void get7Bag(unsigned int pos);
 tetromino pop(void);
 tetromino manageInput(int input, tetromino *currentPiece, int *count, tetromino *shadow);
 tetromino ghost(tetromino piece);
+
+void initQueue(void);
+void updateQueue(void);
+void drawInQueue(tetromino piece, int position);
+void printQueue(void);
 
 tetromino cola[14];
 
@@ -53,6 +60,7 @@ int main(int nargs, char **argsv){
 		if (set){	
 			clearLines();
 			piece = pop();
+			updateQueue();
 			possible = fall(&piece);
 			if(secondCheck(&possible)){
 				piece = possible;
@@ -60,10 +68,7 @@ int main(int nargs, char **argsv){
 				//Game over
 				break;
 			}
-			drawPiece(&piece);
-			shadow = ghost(piece);
-			drawGhostPiece(&shadow);
-			printMatrix();
+			draw(&piece, &shadow);
 			set = 0;
 			//delay(200);
 		}
@@ -84,10 +89,7 @@ int main(int nargs, char **argsv){
 			}
 		}
 		erasePiece(&shadow);
-		shadow = ghost(piece);
-		drawGhostPiece(&shadow);
-		drawPiece(&piece);
-		printMatrix();
+		draw(&piece, &shadow);
 		count++;
 	}
 	cleanUp();
@@ -99,6 +101,7 @@ void init(int nargs, char **argsv){
 	setRaw();
 	setSpecialInput();
 	initMatrix();
+	initQueue();
 	defaultVariables();
 	get7Bag(0);
 	get7Bag(7);
@@ -124,6 +127,14 @@ void initMatrix(void){
 			matrix[y][x].b = 0;
 		}
 	}
+}
+
+void draw(tetromino *piece, tetromino *shadow){
+		*shadow = ghost(*piece);
+		drawGhostPiece(shadow);
+		drawPiece(piece);
+		printMatrix();
+		printQueue();
 }
 
 tetromino ghost(tetromino piece){
@@ -273,4 +284,53 @@ tetromino pop(void){
 	count ++;
 	if (count % 7 == 0) get7Bag(7);
 	return ready;
+}
+
+void initQueue(void){
+	for(int y=0;y<QUEUE_Y;y++){
+		for(int x=0;x<QUEUE_X;x++){
+			queue[y][x].r = 0;
+			queue[y][x].g = 0;
+			queue[y][x].b = 0;
+		}
+	}
+
+}
+
+void drawInQueue(tetromino piece, int position){
+	piece.body[0].x = 1;
+	piece.body[0].y = position * 3 + 1;
+	generatePiece(&piece);
+	for (int i=0;i<4;i++){
+		queue[piece.body[i].y][piece.body[i].x] = piece.color;
+	}
+}
+
+void updateQueue(void){
+	initQueue();
+	for (int i=0;i<4;i++){
+		drawInQueue(cola[i], i);
+	}
+}
+
+void printQueue(void){
+	//Hacemos el reescalamiento de coordenadas
+	int origin_x = 11 * BLOCK_X + (SIZE_X-MATRIX_X*BLOCK_X)/2;
+	int origin_y = BLOCK_Y + (SIZE_Y-MATRIX_Y*BLOCK_Y)/2;
+	//Iteramos sobre cada pixel de la matriz
+	for(int y=0;y<QUEUE_Y;y++){
+		for(int x=0;x<QUEUE_X;x++){
+			pixel p = queue[y][x];
+			//Utilizamos el color del pixel actual
+			setColor(p.r,p.g,p.b);
+			//Esto es para imprimir los bloques
+			//que representan un pixel.
+			for(int i=0;i<BLOCK_Y;i++){
+				gotoxy(origin_x + x*BLOCK_X, origin_y + y*BLOCK_Y + i);
+				for(int j=0;j<BLOCK_X;j++){
+					printf(BLOCK);
+				}
+			}
+		}
+	}
 }
