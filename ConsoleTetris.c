@@ -26,6 +26,7 @@ tetromino defaultPositions[7];
 //Matriz principal del juego
 pixel matrix[MATRIX_Y+2][MATRIX_X];
 
+void init(int nargs, char **argsv);
 void initMatrix(void);
 void printMatrix(void);
 void drawPiece(tetromino *piece);
@@ -35,98 +36,34 @@ int getInput(void);
 void clearLines(void);
 void get7Bag(unsigned int pos);
 tetromino pop(void);
+tetromino manageInput(int input, tetromino *currentPiece, int *count);
 
 tetromino cola[14];
+int input, count, timer, set;
 
 int main(int nargs, char **argsv){
-	srand(time(0));
-	setRaw();
-	setSpecialInput();
-	//Initialize
-	initMatrix();
-	defaultVariables();
-	get7Bag(0);
-	get7Bag(7);
-
-	//Prueba de dibujo:
+	init(nargs, argsv);
 	tetromino piece = pop();
 	piece = fall(&piece);
 	drawPiece(&piece);
 	printMatrix();
-	int input;
-	int count = 0;
-	int timer = nargs == 2 ? atoi(argsv[1]) : 10;
-	int set = 0;
+	tetromino possible;
 	while((input = getchar()) != 3){
+		count++;
 		if (set){	
-			//printf("\a");
 			clearLines();
 			piece = pop();
+			possible = fall(&piece);
+			if(secondCheck(&possible)){
+				piece = possible;
+			} else {
+				break;
+			}
 			drawPiece(&piece);
 			printMatrix();
 			set = 0;
 		}
-		count++;
-		tetromino possible;
-		switch(input){
-			case -1:
-				possible = piece;
-				rewind(stdin);
-				break;
-			case 'a':
-				possible = moveL(&piece);
-				break;
-			case 'd':
-				possible = moveR(&piece);
-				break;
-			case 's':
-				count = timer;
-				break;
-			case 'w':
-				int final = 1;
-				possible = piece;
-				count = timer;
-				do{
-					possible = fall(&piece);
-					if(firstCheck(&possible)){
-						erasePiece(&piece);
-						if (secondCheck(&possible)){
-							piece = possible;
-						} else {
-							final = 0;
-						}
-					} else {
-						final = 0;
-					}
-				} while(final);
-				break;
-			case 27://Esto es para las flechas.
-				if(getchar() == 91){
-					switch(getchar()){
-						case 68:
-							//printf("\a");
-							possible = rotateL(&piece);
-							break;
-						case 67:
-							//printf("\a");
-							possible = rotateR(&piece);
-							break;
-						case 66:
-							//printf("\a");
-							possible = rotate2(&piece);
-							break;
-						default:
-							possible = piece;
-							break;
-					}
-				}
-				break;
-			default:
-				possible = piece;
-				rewind(stdin);
-				break;
-		}
-
+		possible = manageInput(input, &piece, &count);
 		//Verifica si es valido el movimiento actual
 		if(firstCheck(&possible)){
 			erasePiece(&piece);
@@ -161,7 +98,22 @@ int main(int nargs, char **argsv){
 	gotoxy(0,0);
 	resetColor();
 	setNormalInput();
+	printf("Game over!\n");
 	return 0;
+}
+
+void init(int nargs, char **argsv){
+	srand(time(0));
+	setRaw();
+	setSpecialInput();
+	initMatrix();
+	defaultVariables();
+	get7Bag(0);
+	get7Bag(7);
+	input = 0;
+	count = 0;
+	timer = nargs == 2 ? atoi(argsv[1]) : 10;
+	set = 0;
 }
 
 //Simplemente inicializamos cada pizel de la matriz en negro.
@@ -172,6 +124,52 @@ void initMatrix(void){
 			matrix[y][x].g = 0;
 			matrix[y][x].b = 0;
 		}
+	}
+}
+
+tetromino ghost(tetromino piece){
+	erasePiece(&piece);
+	tetromino possible = piece;
+	while (secondCheck(&possible) && firstCheck(&possible)){
+			possible = fall(&possible);
+	}
+	possible.body[0].y--;
+	generatePiece(&possible);
+	drawPiece(&piece);
+	return possible;
+}
+
+tetromino manageInput(int input, tetromino *piece, int *count){
+	switch(input){
+		case 'a':
+			return moveL(piece);
+		case 'd':
+			return moveR(piece);
+		case 's':
+			*count = 0;
+			return *piece;
+		case 'w':
+			*count = 0;
+			return ghost(*piece);
+		//Esto es para las flechas.
+		case 27:
+			if(getchar() == 91){
+				switch(getchar()){
+					case 68:
+						return rotateL(piece);
+					case 67:
+						return rotateR(piece);
+					case 66:
+						return rotate2(piece);
+					default:
+						break;
+				}
+			}
+		case -1:
+			rewind(stdin);
+			return *piece;
+		default:
+			return *piece;
 	}
 }
 
