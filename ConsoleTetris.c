@@ -12,6 +12,7 @@ Proyecto Final
 #include <string.h>
 #include <time.h>
 #include <math.h>
+#include <pthread.h>
 
 //En esta versión, quiero implementar TETRIS con gráficos en consola.
 #include "screen.h"
@@ -36,9 +37,13 @@ tetromino manageInput(int input, tetromino *currentPiece,
 
 void updateScore(unsigned long *score, unsigned char linesCleared, int timer);
 
+void *playMusic(void *);
+
 tetromino cola[14];
 
 int main(int nargs, char **argsv){
+	pthread_t music;
+	pthread_create(&music, NULL, playMusic, NULL);
 	init(nargs, argsv);
 	int input, count, timer, set, holdRight;
 	unsigned long score = 0;
@@ -49,7 +54,8 @@ int main(int nargs, char **argsv){
 		if (set){	
 			unsigned char lines = clearLines();
 			updateScore(&score, lines, timer);
-			timer = 10 - (int)log2f(score/1000);
+			timer = 10 - (int)log2f((score/1000) + 1);
+			timer = timer >= 1 ? timer : 1;
 			piece = pop();
 			updateQueue();
 			possible = fall(&piece);
@@ -84,7 +90,8 @@ int main(int nargs, char **argsv){
 		draw(&piece, &shadow, holdRight, score);
 		count++;
 	}
-	cleanUp();
+	cleanUp(score);
+	pthread_join(music, NULL);
 	return 0;
 }
 
@@ -155,4 +162,8 @@ void updateScore(unsigned long *score, unsigned char linesCleared, int timer){
 	points *= combo;
 	combo++;
 	*score += points;
+}
+
+void *playMusic(void *){
+	system("play music.mp3 -q --multi-threaded repeat 32");
 }

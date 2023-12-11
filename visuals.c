@@ -20,7 +20,7 @@ void init(int nargs, char **argsv){
 	get7Bag(7);
 }
 
-void cleanUp(void){
+void cleanUp(unsigned long score){
 	//Clean up
 	system("clear");
 	setCooked();
@@ -28,6 +28,8 @@ void cleanUp(void){
 	resetColor();
 	setNormalInput();
 	printf("Game over!\n");
+	printf("Tu puntaje final fue: %lu.\n", score);
+	printf("Presiona Ctrl+C para salir.\n");
 
 }
 

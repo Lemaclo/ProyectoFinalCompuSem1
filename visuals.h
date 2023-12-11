@@ -16,7 +16,7 @@ extern pixel hold[HOLD_Y][HOLD_X];
 extern tetromino cola[14];
 
 void init(int nargs, char **argsv);
-void cleanUp(void);
+void cleanUp(unsigned long score);
 
 void initMatrix(void);
 void printMatrix(void);

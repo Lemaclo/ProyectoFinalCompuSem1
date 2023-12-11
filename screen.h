@@ -1,3 +1,23 @@
+/*
+Luis Emilio Martínez Capetillo
+luis.capetillo@cimat.mx
+Licenciatura en Computación Matemática, Semestre 1
+Elementos de Ciencias de la Computación
+Profesor Alonso Ramirez
+Proyecto Final
+*/
+
+/*
+ * Esta es una modificación de la librería que nos compartió el
+ * profesor durante la clase. Contiene funciones que ayudan a
+ * cambiar el color de los caracteres, a mover el cursor, y a borrar
+ * la pantalla. También maneja las funciones que establecen el modo 
+ * crudo y el input con límite de tiempo.
+ *
+ * Cabe resaltar que la mayoría de estas funciones son exclusivas
+ * de Linux. 
+ */
+
 #ifndef SCREEN_H
 #define SCREEN_H
 
