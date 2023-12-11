@@ -241,3 +241,103 @@ char secondCheck(tetromino *piece){
 	}
 	return 1;
 }
+
+tetromino ghost(tetromino piece){
+	erasePiece(&piece);
+	tetromino possible = piece;
+	while (secondCheck(&possible) && firstCheck(&possible)){
+			possible = fall(&possible);
+	}
+	possible.body[0].y--;
+	generatePiece(&possible);
+	drawPiece(&piece);
+	return possible;
+}
+
+//Agrega una pieza a la matriz que se dibuja.
+void drawPiece(tetromino *piece){
+	for(int i=0;i<4;i++){
+		matrix[piece->body[i].y][piece->body[i].x] = piece->color;
+	}
+}
+
+void drawGhostPiece(tetromino *piece){
+	for(int i=0;i<4;i++){
+		matrix[piece->body[i].y][piece->body[i].x].r = piece->color.r / 3;
+		matrix[piece->body[i].y][piece->body[i].x].g = piece->color.g / 3;
+		matrix[piece->body[i].y][piece->body[i].x].b = piece->color.b / 3;
+	}
+}
+
+//Esto hace desaparecer las lineas que ya se completaron de la matriz.
+unsigned char clearLines(void){
+	unsigned char linesCleared = 0;
+	for(int i=2;i<MATRIX_Y+2;i++){
+		int flag = 0;
+		for(int j=0;j<MATRIX_X;j++){
+			if(isEmpty(j,i) == 0){
+				flag = 1;
+				break;
+			}
+		}
+		if(flag) continue;
+		linesCleared++;
+		printf("\a");
+		for(int k=i;k>2;k--){
+			for(int l=0;l<MATRIX_X;l++){
+				matrix[k][l] = matrix[k-1][l];
+			}
+		}
+		for(int k=2;k<MATRIX_X;k++){
+			matrix[0][k].r = 0;
+			matrix[0][k].g = 0;
+			matrix[0][k].b = 0;
+		}
+		if (linesCleared >= 4) break;
+	}
+	return linesCleared;
+}
+
+//Copia 7 tetrominos directamente a la cola. Pos unicamente 
+//puede ser 0 o 7.
+void get7Bag(unsigned int pos){
+	tetromino shuffled[7];
+	memcpy(shuffled, defaultPositions, sizeof(tetromino) * 7);
+	for (int i=0;i<7;i++){
+		int j = rand() % (i+1);
+		if (i != j){
+			tetromino temp = shuffled[i];
+			shuffled[i] = shuffled[j];
+			shuffled[j] = temp;
+		}
+	}
+	memcpy(cola + pos, shuffled, 7 * sizeof(tetromino));
+}
+
+tetromino pop(void){
+	static int count;
+	tetromino ready = cola[0];
+	memcpy(cola, cola + 1, 13 * sizeof(tetromino));
+	count ++;
+	if (count % 7 == 0) get7Bag(7);
+	return ready;
+}
+
+tetromino holdPiece(tetromino piece){
+	static tetromino currentHold;
+	static unsigned int count;
+	tetromino response;
+	if (count == 0){
+		currentHold = defaultPositions[piece.id];
+		response = pop();
+		response = fall(&response);
+		updateQueue();
+		drawInHold(currentHold);
+		count++;
+		return response;
+	}
+	response = fall(&currentHold);
+	currentHold = defaultPositions[piece.id];
+	drawInHold(currentHold);
+	return response;
+}

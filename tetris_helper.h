@@ -10,6 +10,11 @@ Proyecto Final
 #ifndef TETRIS_HELPER
 #define TETRIS_HELPER
 
+#include <stdlib.h>
+#include <stdio.h>
+#include <time.h>
+#include <string.h>
+
 #define O_PIECE 0
 #define I_PIECE 1
 #define T_PIECE 2
@@ -60,6 +65,8 @@ typedef struct{
 	pixel color;
 }tetromino;
 
+#include "visuals.h"
+
 void defaultVariables(void);
 void generatePiece(tetromino *piece);
 tetromino rotateR(tetromino *piece);
@@ -73,9 +80,20 @@ unsigned char isEmpty(unsigned char x, unsigned char y);
 char firstCheck(tetromino *piece);
 char secondCheck(tetromino *piece);
 char legalPiece(tetromino *piece);
+tetromino ghost(tetromino piece);
+void drawPiece(tetromino *piece);
+void drawGhostPiece(tetromino *piece);
+unsigned char clearLines(void);
+void get7Bag(unsigned int pos);
+tetromino pop(void);
+tetromino holdPiece(tetromino piece);
+void printScore(unsigned long score);
 
 //Este arreglo guarda la información de la posición inicial de cada pieza.
 extern tetromino defaultPositions[7];
 extern pixel matrix[MATRIX_Y+2][MATRIX_X];
+extern pixel queue[QUEUE_Y][QUEUE_X];
+extern pixel hold[HOLD_Y][HOLD_X];
+extern tetromino cola[14];
 
 #endif
