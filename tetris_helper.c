@@ -25,6 +25,8 @@ void defaultVariables(void){
 	defaultPositions[0].color.g = 0xff;
 	defaultPositions[0].color.b = 0x0;
 
+	defaultPositions[0].id = O_PIECE;
+
 	//Pieza I
 
 	defaultPositions[1].generation_offset[0].x = -1;
@@ -39,6 +41,8 @@ void defaultVariables(void){
 	defaultPositions[1].color.r = 0x0;
 	defaultPositions[1].color.g = 0xff;
 	defaultPositions[1].color.b = 0xff;
+
+	defaultPositions[1].id = I_PIECE;
 
 	//Pieza T
 
@@ -55,6 +59,8 @@ void defaultVariables(void){
 	defaultPositions[2].color.g = 0x0;
 	defaultPositions[2].color.b = 0x80;
 	
+	defaultPositions[2].id = T_PIECE;
+
 	//Pieza L
 
 	defaultPositions[3].generation_offset[0].x = -1;
@@ -69,6 +75,8 @@ void defaultVariables(void){
 	defaultPositions[3].color.r = 0xff;
 	defaultPositions[3].color.g = 0x7f;
 	defaultPositions[3].color.b = 0x00;
+
+	defaultPositions[3].id = L_PIECE;
 
 	//Pieza J
 
@@ -85,6 +93,8 @@ void defaultVariables(void){
 	defaultPositions[4].color.g = 0x00;
 	defaultPositions[4].color.b = 0xff;
 
+	defaultPositions[4].id = J_PIECE;
+
 	//Pieza S
 
 	defaultPositions[5].generation_offset[0].x = -1;
@@ -100,6 +110,8 @@ void defaultVariables(void){
 	defaultPositions[5].color.g = 0xff;
 	defaultPositions[5].color.b = 0x00;
 
+	defaultPositions[5].id = S_PIECE;
+
 	//Pieza Z
 
 	defaultPositions[6].generation_offset[0].x = -1;
@@ -114,6 +126,8 @@ void defaultVariables(void){
 	defaultPositions[6].color.r = 0xff;
 	defaultPositions[6].color.g = 0x00;
 	defaultPositions[6].color.b = 0x00;
+
+	defaultPositions[6].id = Z_PIECE;
 
 	//Cada pieza empieza con estado 0 (sin rotar):
 

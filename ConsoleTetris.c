@@ -27,6 +27,8 @@ tetromino defaultPositions[7];
 pixel matrix[MATRIX_Y+2][MATRIX_X];
 //Cola
 pixel queue[QUEUE_Y][QUEUE_X];
+//Hold
+pixel hold[HOLD_Y][HOLD_X];
 
 void init(int nargs, char **argsv);
 void cleanUp(void);
@@ -34,13 +36,14 @@ void initMatrix(void);
 void printMatrix(void);
 void drawPiece(tetromino *piece);
 void drawGhostPiece(tetromino *piece);
-void draw(tetromino *piece, tetromino *shadow);
+void draw(tetromino *piece, tetromino *shadow, unsigned int holdRight);
 tetromino getPiece(int id);
 void delay(unsigned int milis);
 void clearLines(void);
 void get7Bag(unsigned int pos);
 tetromino pop(void);
-tetromino manageInput(int input, tetromino *currentPiece, int *count, tetromino *shadow);
+tetromino manageInput(int input, tetromino *currentPiece, 
+		int *count, tetromino *shadow, int *holdRight);
 tetromino ghost(tetromino piece);
 
 void initQueue(void);
@@ -48,13 +51,18 @@ void updateQueue(void);
 void drawInQueue(tetromino piece, int position);
 void printQueue(void);
 
+void initHold(void);
+tetromino holdPiece(tetromino piece);
+void drawInHold(tetromino piece);
+void printHold(unsigned int holdRight);
+
 tetromino cola[14];
 
 int main(int nargs, char **argsv){
 	init(nargs, argsv);
-	int input, count, timer, set;
+	int input, count, timer, set, holdRight;
 	tetromino piece, possible, shadow;
-	count = set = 1;
+	count = set = holdRight = 1;
 	timer = 10;
 	while((input = getchar()) != 3){
 		if (set){	
@@ -68,11 +76,12 @@ int main(int nargs, char **argsv){
 				//Game over
 				break;
 			}
-			draw(&piece, &shadow);
+			draw(&piece, &shadow, holdRight);
 			set = 0;
+			holdRight = 1;
 			//delay(200);
 		}
-		possible = manageInput(input, &piece, &count, &shadow);
+		possible = manageInput(input, &piece, &count, &shadow, &holdRight);
 		//Verifica si es valido el movimiento actual
 		erasePiece(&piece);
 		if(legalPiece(&possible)){
@@ -89,7 +98,7 @@ int main(int nargs, char **argsv){
 			}
 		}
 		erasePiece(&shadow);
-		draw(&piece, &shadow);
+		draw(&piece, &shadow, holdRight);
 		count++;
 	}
 	cleanUp();
@@ -129,12 +138,13 @@ void initMatrix(void){
 	}
 }
 
-void draw(tetromino *piece, tetromino *shadow){
+void draw(tetromino *piece, tetromino *shadow, unsigned int holdRight){
 		*shadow = ghost(*piece);
 		drawGhostPiece(shadow);
 		drawPiece(piece);
 		printMatrix();
 		printQueue();
+		printHold(holdRight);
 }
 
 tetromino ghost(tetromino piece){
@@ -149,7 +159,7 @@ tetromino ghost(tetromino piece){
 	return possible;
 }
 
-tetromino manageInput(int input, tetromino *piece, int *count, tetromino *shadow){
+tetromino manageInput(int input, tetromino *piece, int *count, tetromino *shadow, int *holdRight){
 	switch(input){
 		case 'a':
 			return moveL(piece);
@@ -171,6 +181,11 @@ tetromino manageInput(int input, tetromino *piece, int *count, tetromino *shadow
 						return rotateR(piece);
 					case 66:
 						return rotate2(piece);
+					case 65:
+						if (*holdRight){
+							*holdRight = 0;
+							return holdPiece(*piece);
+						}
 					default:
 						break;
 				}
@@ -333,4 +348,76 @@ void printQueue(void){
 			}
 		}
 	}
+	gotoxy(origin_x + BLOCK_X, origin_y - BLOCK_Y);
+	setColor(255, 255, 255);
+	printf("Next");
+}
+
+void initHold(void){
+	for(int y=0;y<HOLD_Y;y++){
+		for(int x=0;x<HOLD_X;x++){
+			hold[y][x].r = 0;
+			hold[y][x].g = 0;
+			hold[y][x].b = 0;
+		}
+	}
+
+}
+
+tetromino holdPiece(tetromino piece){
+	static tetromino currentHold;
+	static unsigned int count;
+	tetromino response;
+	if (count == 0){
+		currentHold = defaultPositions[piece.id];
+		response = pop();
+		response = fall(&response);
+		updateQueue();
+		drawInHold(currentHold);
+		count++;
+		return response;
+	}
+	response = fall(&currentHold);
+	currentHold = defaultPositions[piece.id];
+	drawInHold(currentHold);
+	return response;
+}
+
+void drawInHold(tetromino piece){
+	initHold();
+	piece.body[0].x = 1;
+	piece.body[0].y = 1;
+	generatePiece(&piece);
+	for(int i=0;i<4;i++){
+		hold[piece.body[i].y][piece.body[i].x] = piece.color;
+	}
+}
+
+void printHold(unsigned int holdRight){
+	//Hacemos el reescalamiento de coordenadas
+	int origin_x = (SIZE_X-MATRIX_X*BLOCK_X)/2 - (5 * BLOCK_X);
+	int origin_y = BLOCK_Y + (SIZE_Y-MATRIX_Y*BLOCK_Y)/2;
+	//Iteramos sobre cada pixel de la matriz
+	for(int y=0;y<HOLD_Y;y++){
+		for(int x=0;x<HOLD_X;x++){
+			pixel p = hold[y][x];
+			if ((p.r | p.g | p.b) >= 0x80 && !holdRight){
+				setColor(0xC0, 0xC0, 0xC0);
+			} else {
+				setColor(p.r,p.g,p.b);
+			}
+			//Utilizamos el color del pixel actual
+			//Esto es para imprimir los bloques
+			//que representan un pixel.
+			for(int i=0;i<BLOCK_Y;i++){
+				gotoxy(origin_x + x*BLOCK_X, origin_y + y*BLOCK_Y + i);
+				for(int j=0;j<BLOCK_X;j++){
+					printf(BLOCK);
+				}
+			}
+		}
+	}
+	gotoxy(origin_x + BLOCK_X, origin_y - BLOCK_Y);
+	setColor(255, 255, 255);
+	printf("Hold");
 }

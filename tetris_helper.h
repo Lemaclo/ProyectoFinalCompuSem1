@@ -30,6 +30,10 @@ Proyecto Final
 #define QUEUE_X 4
 #define QUEUE_Y 12
 
+//Tamaño del hold
+#define HOLD_X 4
+#define HOLD_Y 3
+
 //Bloque imprimible
 #define BLOCK "█"
 
@@ -52,7 +56,7 @@ typedef struct{
 typedef struct{
 	mino body[4];
 	move generation_offset[3];
-	unsigned char state;
+	unsigned char state, id;
 	pixel color;
 }tetromino;
 
