@@ -246,8 +246,7 @@ unsigned char isEmpty(unsigned char x, unsigned char y){
 //de la matriz y que no colisionen con otras piezas.
 //Nótese que si la pieza actual estuviera guardada en la matriz, esto fallaría
 //siempre, así que antes de hacer este chequeo, tenemos que borrar la pieza
-//con erasePiece. Si el movimiento es legal, podemos dibujar la nueva pieza, 
-//y si no, la restauramos.
+//con erasePiece.
 char legalPiece(tetromino *piece){
 	for(int i=0;i<4;i++){
 		short x = piece->body[i].x;
@@ -259,15 +258,13 @@ char legalPiece(tetromino *piece){
 	return 1;
 }
 
-char secondCheck(tetromino *piece){
-	for(int i=0;i<4;i++){
-		short x = piece->body[i].x;
-		short y = piece->body[i].y;
-		if(isEmpty(x,y) != 0) return 0;
-	}
-	return 1;
-}
-
+//Devuelve el tetrominó "sombra" de otro. La sombra
+//es la posición de la pieza que resultaría si no movemos nada un buen rato. 
+//Sirve mucho para utilizar el "hard drop", es decir, la
+//caída instantánea que sucede con w.
+//Y lo que hace la función es que mientras que la caída de la pieza
+//sea legal, sigue cayendo. Cuando no sea legal, revierte la última
+//caída, y devuelve esa pieza.
 tetromino ghost(tetromino piece){
 	erasePiece(&piece);
 	tetromino possible = piece;
@@ -280,10 +277,13 @@ tetromino ghost(tetromino piece){
 	return possible;
 }
 
-//Esto hace desaparecer las lineas que ya se completaron de la matriz.
+//Esto hace desaparecer las lineas que ya se completaron de la matriz,
+//mueve las líneas arriba de estas hacia abajo, y devuelve la cantidad de líneas que borró.
+//Barre toda la matriz y borra hasta 4 líneas (con las piezas de tetris no
+//es posible limpiar más de cuatro líneas a la vez).
 unsigned char clearLines(void){
 	unsigned char linesCleared = 0;
-	for(int i=2;i<MATRIX_Y+2;i++){
+	for(int i=0;i<MATRIX_Y+2;i++){
 		int flag = 0;
 		for(int j=0;j<MATRIX_X;j++){
 			if(isEmpty(j,i) == 0){
@@ -294,11 +294,14 @@ unsigned char clearLines(void){
 		if(flag) continue;
 		linesCleared++;
 		printf("\a");
+		//Para borrar una línea, mueve todas las de arriba un espacio 
+		//hacia abajo, y establece la línea de más arriba a negro.
 		for(int k=i;k>2;k--){
 			for(int l=0;l<MATRIX_X;l++){
 				matrix[k][l] = matrix[k-1][l];
 			}
 		}
+		
 		for(int k=2;k<MATRIX_X;k++){
 			matrix[0][k].r = 0;
 			matrix[0][k].g = 0;
@@ -309,11 +312,20 @@ unsigned char clearLines(void){
 	return linesCleared;
 }
 
-//Copia 7 tetrominos directamente a la cola. Pos unicamente 
-//puede ser 0 o 7.
+//En tetris, la generación de piezas no es completamente aleatoria.
+//Se utiliza un sistema de "bolsas", para que todas las piezas salgan
+//a menudo. Una bolsa tiene los siete tipos de tetrominos, y es el 
+//orden de la bolsa lo que se deja al azar. Esto hace, por ejemplo, 
+//que no pueda tocar la misma pieza 3 veces seguidas, o que si ponemos una pieza, 
+//a lo más toquen 12 diferentes consecutivas, entre otras propiedades
+//deseables en el juego.
+//Esta función obtiene una bolsa y cambia el orden de manera aleatoria.
+//Además, como la cola mide 14 piezas, puede insertar la bolsa al principio
+//o al final de la cola.
 void get7Bag(unsigned int pos){
 	tetromino shuffled[7];
 	memcpy(shuffled, defaultPositions, sizeof(tetromino) * 7);
+	//Fisher-Yates shuffle
 	for (int i=0;i<7;i++){
 		int j = rand() % (i+1);
 		if (i != j){
@@ -325,6 +337,7 @@ void get7Bag(unsigned int pos){
 	memcpy(cola + pos, shuffled, 7 * sizeof(tetromino));
 }
 
+//Obtiene el siguiente tetromino de la cola
 tetromino pop(void){
 	static int count;
 	tetromino ready = cola[0];
@@ -334,10 +347,17 @@ tetromino pop(void){
 	return ready;
 }
 
+//Implementa la función de reserva de tetris. Cuando se presiona la
+//flecha arriba, se guarda la pieza actual y se cambia por la que estaba en la reserva antes.
+//Sirve mucho si una pieza no queda en el tablero actual, o si queremos llenar un espacio en 
+//específico.
+//El espacio de memoria para el hold es una variable estática.
 tetromino holdPiece(tetromino piece){
 	static tetromino currentHold;
 	static unsigned int count;
 	tetromino response;
+	//Si no se ha usado el hold antes, se guarda
+	//la pieza, y se obtiene una de la cola.
 	if (count == 0){
 		currentHold = defaultPositions[piece.id];
 		response = pop();

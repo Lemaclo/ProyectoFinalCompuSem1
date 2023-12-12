@@ -7,6 +7,18 @@ Profesor Alonso Ramirez
 Proyecto Final
 */
 
+/* Esta librería tiene muchas funciones para trabajar con las piezas de tetris
+ * (tetrominos). En particular, define la estructura que representa cada pieza, 
+ * y funciones de rotación, de caída, de movimiento lateral, de chequeo de movimientos
+ * (para ver si son legales). También implement funciones del juego, como la mecánica
+ * del hold, y el borrado de líneas que están llenas. Además, guarda los valores por 
+ * default de las posiciones y colores de los 7 tipos de piezas.
+ *
+ * Además, intenté que en esta librería no se implementen muchos aspectos
+ * del display del juego, tal que si en algún futuro quisiera utilizar una librería
+ * gráfica, pueda reutilizar la mayoría de código de este archivo.
+ */
+
 #ifndef TETRIS_HELPER
 #define TETRIS_HELPER
 
@@ -23,11 +35,13 @@ Proyecto Final
 #define S_PIECE 5
 #define Z_PIECE 6
 
-//Dimensinoes de la matriz. (10, 20) son las default.
+//Dimensiones de la matriz. (10, 20) son las default de la mayoría de 
+//juegos de Tetris.
 #define MATRIX_X 10
 #define MATRIX_Y 20
 
-//Tamaño de los bloques de chars
+//Tamaño de los bloques de chars. 
+//Esto sirve para cambiar la resolución del juego.
 #define BLOCK_X 2
 #define BLOCK_Y 1
 
@@ -53,15 +67,27 @@ typedef struct{
 }mino;
 
 //Estructura de movimiento
+//únicamente se usa para los offsets 
+//de cada pieza.
 typedef struct{
 	char x,y;
 }move;
 
 //Estructura de tetromino:
+//Cada pieza tiene un centro (body[0]), 
+//y 3 offsets (de tipo move) que definen dónde están
+//los otros bloques relativos al centro. Esto es para
+//que las funciones de movimiento  y rotación se vuelvan 
+//más sencillas y generales para todas las piezas. Además, 
+//con este sistema, es relativamene fácil hacer otros
+//tipos de piezas, o generalizar el juego de otras maneras.
+//El id guarda qué tipo de pieza es. Se usa muy poco, me parece
+//que únicamente en la función hold.
+
 typedef struct{
 	mino body[4];
 	move generation_offset[3];
-	unsigned char state, id;
+	unsigned char id;
 	pixel color;
 }tetromino;
 
@@ -78,7 +104,6 @@ tetromino moveL(tetromino piece);
 void erasePiece(tetromino *piece);
 unsigned char isEmpty(unsigned char x, unsigned char y);
 char legalPiece(tetromino *piece);
-char secondCheck(tetromino *piece);
 tetromino ghost(tetromino piece);
 unsigned char clearLines(void);
 void get7Bag(unsigned int pos);
