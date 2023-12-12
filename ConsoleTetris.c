@@ -32,7 +32,7 @@ pixel queue[QUEUE_Y][QUEUE_X];
 //Hold
 pixel hold[HOLD_Y][HOLD_X];
 
-tetromino manageInput(int input, tetromino *currentPiece, 
+tetromino manageInput(int input, tetromino piece, 
 		int *count, tetromino *shadow, int *holdRight);
 
 void updateScore(unsigned long *score, unsigned char linesCleared, int timer);
@@ -58,7 +58,7 @@ int main(int nargs, char **argsv){
 			timer = timer >= 1 ? timer : 1;
 			piece = pop();
 			updateQueue();
-			possible = fall(&piece);
+			possible = fall(piece);
 			if(secondCheck(&possible)){
 				piece = possible;
 			} else {
@@ -70,7 +70,7 @@ int main(int nargs, char **argsv){
 			holdRight = 1;
 			//delay(200);
 		}
-		possible = manageInput(input, &piece, &count, &shadow, &holdRight);
+		possible = manageInput(input, piece, &count, &shadow, &holdRight);
 		//Verifica si es valido el movimiento actual
 		erasePiece(&piece);
 		if(legalPiece(&possible)){
@@ -78,7 +78,7 @@ int main(int nargs, char **argsv){
 		}
 		//Intenta caer
 		if(count % timer == 0){
-			possible = fall(&piece);
+			possible = fall(piece);
 			erasePiece(&piece);
 			if(legalPiece(&possible)){
 				piece = possible;
@@ -96,7 +96,7 @@ int main(int nargs, char **argsv){
 }
 
 
-tetromino manageInput(int input, tetromino *piece, int *count, tetromino *shadow, int *holdRight){
+tetromino manageInput(int input, tetromino piece, int *count, tetromino *shadow, int *holdRight){
 	switch(input){
 		case 'a':
 			return moveL(piece);
@@ -104,7 +104,7 @@ tetromino manageInput(int input, tetromino *piece, int *count, tetromino *shadow
 			return moveR(piece);
 		case 's':
 			*count = 0;
-			return *piece;
+			return piece;
 		case 'w':
 			*count = 0;
 			return *shadow;
@@ -121,7 +121,7 @@ tetromino manageInput(int input, tetromino *piece, int *count, tetromino *shadow
 					case 65:
 						if (*holdRight){
 							*holdRight = 0;
-							return holdPiece(*piece);
+							return holdPiece(piece);
 						}
 					default:
 						break;
@@ -129,9 +129,9 @@ tetromino manageInput(int input, tetromino *piece, int *count, tetromino *shadow
 			}
 		case -1:
 			rewind(stdin);
-			return *piece;
+			return piece;
 		default:
-			return *piece;
+			return piece;
 	}
 }
 

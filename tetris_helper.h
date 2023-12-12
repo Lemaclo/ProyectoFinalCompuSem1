@@ -69,25 +69,21 @@ typedef struct{
 
 void defaultVariables(void);
 void generatePiece(tetromino *piece);
-tetromino rotateR(tetromino *piece);
-tetromino rotateL(tetromino *piece);
-tetromino rotate2(tetromino *piece);
-tetromino fall(tetromino *piece);
-tetromino moveR(tetromino *piece);
-tetromino moveL(tetromino *piece);
+tetromino rotateR(tetromino piece);
+tetromino rotateL(tetromino piece);
+tetromino rotate2(tetromino piece);
+tetromino fall(tetromino piece);
+tetromino moveR(tetromino piece);
+tetromino moveL(tetromino piece);
 void erasePiece(tetromino *piece);
 unsigned char isEmpty(unsigned char x, unsigned char y);
-char firstCheck(tetromino *piece);
-char secondCheck(tetromino *piece);
 char legalPiece(tetromino *piece);
+char secondCheck(tetromino *piece);
 tetromino ghost(tetromino piece);
-void drawPiece(tetromino *piece);
-void drawGhostPiece(tetromino *piece);
 unsigned char clearLines(void);
 void get7Bag(unsigned int pos);
 tetromino pop(void);
 tetromino holdPiece(tetromino piece);
-void printScore(unsigned long score);
 
 //Este arreglo guarda la información de la posición inicial de cada pieza.
 extern tetromino defaultPositions[7];

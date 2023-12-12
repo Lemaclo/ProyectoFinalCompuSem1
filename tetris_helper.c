@@ -9,6 +9,10 @@ Proyecto Final
 
 #include "tetris_helper.h"
 
+//Inicializa las posiciones, offsets de geración y los colores de los 7 tipos
+//de tetromino por default. Esto es, esencialmente, cargar los 
+//sprites de las piezas en memoria. Esto se hace únicamente al principio del 
+//juego, y se guradan en un arreglo llamado defaultPositions.
 void defaultVariables(void){
 	//Pieza O
 	
@@ -129,17 +133,19 @@ void defaultVariables(void){
 
 	defaultPositions[6].id = Z_PIECE;
 
-	//Cada pieza empieza con estado 0 (sin rotar):
+	//Por default, cada pieza empieza en la casilla (4, 1) de la matriz, 
+	//es decir, arriba en el centro.
 
 	for(int i=0;i<7;i++){
 		defaultPositions[i].body[0].x = 4;
 		defaultPositions[i].body[0].y = 1;
-		defaultPositions[i].state = 0;
 		generatePiece(&defaultPositions[i]);
 	}
 
 }
 
+//Utilizando el "centro" de las piezas y sus offsets de generación actuales, 
+//guarda en la pieza la ubicación de cada uno de los pixels que la conforman.
 void generatePiece(tetromino *piece){
 	for(int i=1;i<4;i++){
 		piece->body[i].x = piece->body[0].x + piece->generation_offset[i-1].x;
@@ -147,71 +153,101 @@ void generatePiece(tetromino *piece){
 	}
 }
 
-tetromino rotateR(tetromino *piece){
-	tetromino babyPiece = *piece;
+//Abajo se encuentran todas las funciones de rotación y traslación 
+//de tetrominos. Hay una función que realiza un movimiento (i.e. rotar
+//90° hacia la derecha) para todos los tipos de piezas.
+
+//Nótese que las funciones de rotación y traslación no modifican la 
+//pieza original, sino que regresa una copia.
+//Esto es intencional, ya que queremos checar si el movimiento
+//que vamos a hacer es legal o no.
+
+//FUNCIONES DE ROTACIÓN
+//Para rotar una pieza, cambiamos los offsets de generación de la misma,
+//y luego la generamos. Por ejemplo, si los offsets de una pieza son
+// ←, ↑, →, para rotar a la derecha los cambiamos a ↑, →, ↓.
+// El centro de la pieza no se mueve durante las rotaciones.
+//Los diagramas y cálculos para cada una de las rotaciones los hice en papel, y 
+//me tomó un buen rato, pero no son difíciles de obtener.
+
+//Rota 90° a la derecha.
+tetromino rotateR(tetromino piece){
 	for(int i=0;i<3;i++){
-		char temp = piece->generation_offset[i].x; 
-		babyPiece.generation_offset[i].x = piece->generation_offset[i].y;
-		babyPiece.generation_offset[i].y = -1*temp;
+		char temp = piece.generation_offset[i].x; 
+		piece.generation_offset[i].x = piece.generation_offset[i].y;
+		piece.generation_offset[i].y = -1*temp;
 	}
-	generatePiece(&babyPiece);
-	return babyPiece;
+	generatePiece(&piece);
+	return piece;
 }
 
-tetromino rotateL(tetromino *piece){
-	tetromino babyPiece = *piece;
+//Rota 90° a la izquierda.
+tetromino rotateL(tetromino piece){
 	for(int i=0;i<3;i++){
-		char temp = piece->generation_offset[i].x; 
-		babyPiece.generation_offset[i].x = -1 * piece->generation_offset[i].y;
-		babyPiece.generation_offset[i].y = temp;
+		char temp = piece.generation_offset[i].x; 
+		piece.generation_offset[i].x = -1 * piece.generation_offset[i].y;
+		piece.generation_offset[i].y = temp;
 	}
-	generatePiece(&babyPiece);
-	return babyPiece;
+	generatePiece(&piece);
+	return piece;
 }
 
-tetromino rotate2(tetromino *piece){
-	tetromino babyPiece = *piece;
+//Rota 180°.
+tetromino rotate2(tetromino piece){
 	for(int i=0;i<3;i++){
-		babyPiece.generation_offset[i].x *= -1;
-		babyPiece.generation_offset[i].y *= -1;
+		piece.generation_offset[i].x *= -1;
+		piece.generation_offset[i].y *= -1;
 	}
-	generatePiece(&babyPiece);
-	return babyPiece;
+	generatePiece(&piece);
+	return piece;
 }
 
-tetromino fall(tetromino *piece){
-	tetromino babyPiece = *piece;
-	babyPiece.body[0].y++;
-	generatePiece(&babyPiece);
-	return babyPiece;
+//FUNCIONES DE TRASLACIÓN
+
+//En contraste,las funciones de movimiento son muy sencillas.
+//Simplemente movemos el centro de la pieza a la dirección que queremos,
+//y generamos la pieza.
+
+//Mueve la pieza una casilla hacia abajo.
+tetromino fall(tetromino piece){
+	piece.body[0].y++;
+	generatePiece(&piece);
+	return piece;
 }
 
-tetromino moveR(tetromino *piece){
-	tetromino babyPiece = *piece;
-	babyPiece.body[0].x++;
-	generatePiece(&babyPiece);
-	return babyPiece;
+//Mueve la pieza una casilla hacia la derecha.
+tetromino moveR(tetromino piece){
+	piece.body[0].x++;
+	generatePiece(&piece);
+	return piece;
 }
 
-tetromino moveL(tetromino *piece){
-	tetromino babyPiece = *piece;
-	babyPiece.body[0].x--;
-	generatePiece(&babyPiece);
-	return babyPiece;
+//Mueve la pieza una casilla hacia la izquierda.
+tetromino moveL(tetromino piece){
+	piece.body[0].x--;
+	generatePiece(&piece);
+	return piece;
 }
 
-void erasePiece(tetromino *piece){
-	for(int i=0;i<4;i++){
-		matrix[piece->body[i].y][piece->body[i].x].r = 0;
-		matrix[piece->body[i].y][piece->body[i].x].g = 0;
-		matrix[piece->body[i].y][piece->body[i].x].b = 0;
-	}
-}
+//FUNCIONES PARA CHECAR SI LOS MOVIMIENTOS SON LEGALES:
 
+//Verifica si una casilla está vacía, mediante el color.
+//Los tetrominos tienen colores muy brillantes, así que 0x80 es el 
+//mínimo en alguno de los canales (en el morado de la pieza T).
+//Entonces, cualquier pixel con menos intensidad que eso
+//está vacío.
+//No checamos si el pixel es exactamente negro por las sombras de las piezas:
+//Son pixeles de colores, pero deberían considerarse vacíos.
 unsigned char isEmpty(unsigned char x, unsigned char y){
 	return (matrix[y][x].r | matrix[y][x].g | matrix[y][x].b) >= 0x80;
 }
 
+//Esta función checa que todos los pixeles que conforman una pieza estén dentro
+//de la matriz y que no colisionen con otras piezas.
+//Nótese que si la pieza actual estuviera guardada en la matriz, esto fallaría
+//siempre, así que antes de hacer este chequeo, tenemos que borrar la pieza
+//con erasePiece. Si el movimiento es legal, podemos dibujar la nueva pieza, 
+//y si no, la restauramos.
 char legalPiece(tetromino *piece){
 	for(int i=0;i<4;i++){
 		short x = piece->body[i].x;
@@ -219,16 +255,6 @@ char legalPiece(tetromino *piece){
 		if(x < 0 || x >= MATRIX_X) return 0;
 		if(y < 0 || y >= MATRIX_Y + 2) return 0;
 		if(isEmpty(x,y) != 0) return 0;
-	}
-	return 1;
-}
-
-char firstCheck(tetromino *piece){
-	for(int i=0;i<4;i++){
-		short x = piece->body[i].x;
-		short y = piece->body[i].y;
-		if(x < 0 || x >= MATRIX_X) return 0;
-		if(y < 0 || y >= MATRIX_Y + 2) return 0;
 	}
 	return 1;
 }
@@ -245,28 +271,13 @@ char secondCheck(tetromino *piece){
 tetromino ghost(tetromino piece){
 	erasePiece(&piece);
 	tetromino possible = piece;
-	while (secondCheck(&possible) && firstCheck(&possible)){
-			possible = fall(&possible);
+	while (legalPiece(&possible)){
+			possible = fall(possible);
 	}
 	possible.body[0].y--;
 	generatePiece(&possible);
 	drawPiece(&piece);
 	return possible;
-}
-
-//Agrega una pieza a la matriz que se dibuja.
-void drawPiece(tetromino *piece){
-	for(int i=0;i<4;i++){
-		matrix[piece->body[i].y][piece->body[i].x] = piece->color;
-	}
-}
-
-void drawGhostPiece(tetromino *piece){
-	for(int i=0;i<4;i++){
-		matrix[piece->body[i].y][piece->body[i].x].r = piece->color.r / 3;
-		matrix[piece->body[i].y][piece->body[i].x].g = piece->color.g / 3;
-		matrix[piece->body[i].y][piece->body[i].x].b = piece->color.b / 3;
-	}
 }
 
 //Esto hace desaparecer las lineas que ya se completaron de la matriz.
@@ -330,13 +341,13 @@ tetromino holdPiece(tetromino piece){
 	if (count == 0){
 		currentHold = defaultPositions[piece.id];
 		response = pop();
-		response = fall(&response);
+		response = fall(response);
 		updateQueue();
 		drawInHold(currentHold);
 		count++;
 		return response;
 	}
-	response = fall(&currentHold);
+	response = fall(currentHold);
 	currentHold = defaultPositions[piece.id];
 	drawInHold(currentHold);
 	return response;
